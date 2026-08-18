@@ -141,3 +141,33 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# ---- NestJS / editors (gop tu nestjs-api-app/.gitignore) ----
+
+# compiled output
+/build
+
+# OS
+.DS_Store
+
+# Logs
+pnpm-debug.log*
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# temp directory
+.tmp
