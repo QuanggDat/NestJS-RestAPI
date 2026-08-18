@@ -1,82 +1,98 @@
-# NestJS REST API — Dự án học
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+</p>
 
-Dự án cá nhân dùng để **học NestJS** và cách xây dựng một REST API theo kiến trúc module hoá.
-Repo hiện đang ở giai đoạn khởi tạo: bộ  khung ứng dụng đã dựng xong, các module nghiệp vụ
-(`auth`, `user`, `note`) đã được tạo và đăng ký, phần logic sẽ được bổ sung dần theo tiến độ học.
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-## Mục tiêu học tập
+  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+    <p align="center">
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
+<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
+<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
+  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
+    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+</p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-- Hiểu cấu trúc một ứng dụng NestJS: **Module – Controller – Service**
-- Nắm cách hoạt động của **Dependency Injection** qua decorator `@Injectable()` và constructor injection
-- Xây dựng REST API với các nhóm route: xác thực (`auth`), người dùng (`user`), ghi chú (`note`)
-- Làm quen với TypeScript, ESLint, Prettier và testing bằng Jest trong hệ sinh thái Nest
+## Description
 
-## Công nghệ sử dụng
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-| Thành phần | Công nghệ |
-|---|---|
-| Framework | NestJS 11 |
-| Ngôn ngữ | TypeScript 5 |
-| HTTP platform | Express |
-| Testing | Jest + Supertest |
-| Code style | ESLint + Prettier |
-
-## Cấu trúc thư mục
-
-```
-NestJS-RestAPI/
-└── nestjs-api-app/
-    ├── src/
-    │   ├── main.ts            # Điểm khởi động, bootstrap ứng dụng (mặc định port 3000)
-    │   ├── app.module.ts      # Module gốc, import AuthModule / UserModule / NoteModule
-    │   ├── auth/              # Module xác thực
-    │   │   ├── auth.module.ts
-    │   │   ├── auth.controller.ts
-    │   │   └── auth.service.ts
-    │   ├── user/              # Module người dùng
-    │   │   └── user.module.ts
-    │   └── note/              # Module ghi chú
-    │       └── note.module.ts
-    ├── test/                  # Test e2e
-    └── package.json
-```
-
-## Cài đặt & chạy
+## Project setup
 
 ```bash
-cd nestjs-api-app
-npm install
+$ npm install
 ```
+
+## Compile and run the project
 
 ```bash
-npm run start:dev     # chế độ watch, tự reload khi sửa code
-npm run start         # chạy thường
-npm run build         # build ra thư mục dist/
-npm run start:prod    # chạy bản build
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+
+# production mode
+$ npm run start:prod
 ```
 
-Ứng dụng chạy tại `http://localhost:3000` (đổi bằng biến môi trường `PORT`).
-
-## Các lệnh khác
+## Run tests
 
 ```bash
-npm run lint          # kiểm tra và tự sửa lỗi lint
-npm run format        # format code bằng Prettier
-npm test              # chạy unit test
-npm run test:e2e      # chạy test e2e
-npm run test:cov      # báo cáo độ phủ test
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
 ```
 
-## Lộ trình học
+## Deployment
 
-- [x] Khởi tạo project, dựng cấu trúc module cơ bản
-- [ ] Hoàn thiện `AuthModule`: đăng ký, đăng nhập
-- [ ] Kết nối cơ sở dữ liệu và tầng truy xuất dữ liệu
-- [ ] Validation request bằng DTO và `ValidationPipe`
-- [ ] Bảo vệ route bằng JWT và Guard
-- [ ] CRUD đầy đủ cho `user` và `note`
-- [ ] Viết unit test và e2e test cho từng module
+When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
-## Ghi chú
+If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
 
-Đây là repo phục vụ mục đích học tập, không dùng cho môi trường production.
+```bash
+$ npm install -g @nestjs/mau
+$ mau deploy
+```
+
+With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+
+## Resources
+
+Check out a few resources that may come in handy when working with NestJS:
+
+- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
+- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
+- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
+- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
+- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
+- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
+- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
+- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+
+## Support
+
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+
+## Stay in touch
+
+- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
+
+## License
+
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).

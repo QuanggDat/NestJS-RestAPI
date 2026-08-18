@@ -1,14 +1,22 @@
 import { Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-@Controller()
+
+//all routes in this controller are prefixed with /auth
+@Controller('auth')
 export class AuthController {
   //auth service is automatically created when initializing the controller
   constructor(private authService: AuthService) {}
-  //some requests from client
+
+  //POST: .../auth/register
   @Post('register') //register a new user
-  register() {}
+  register() {
+    return this.authService.register();
+  }
+
   //POST: .../auth/login
   @Post('login')
-  login() {}
+  login() {
+    return this.authService.login();
+  }
 }
 //export = "make public"
