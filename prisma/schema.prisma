@@ -1,11 +1,12 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Đây là file schema của Prisma,
+// tìm hiểu thêm tại: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Tạo nhanh một Postgres miễn phí: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -20,14 +21,26 @@ model User {
   lastName       String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  //quan hệ
+  notes Note[]
+
+  @@map("users") //"users" là tên bảng thật trong Postgres SQL
 }
 
+//Một user có thể "viết" nhiều note
 model Note {
   id          Int      @id @default(autoincrement())
   title       String
   description String
   url         String
-  // other fields ...
+  // các field khác ...
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  //quan hệ
+  userId Int //đóng vai trò "khoá ngoại"
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("notes")
 }
