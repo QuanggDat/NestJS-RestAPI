@@ -1,0 +1,55 @@
+# Docker Compose cho môi trường development của NestJS API
+services:
+  dev-database:
+    image: postgres:15.0
+    container_name: dev-database
+    # Tự khởi động lại container khi Docker start, trừ khi bị stop thủ công
+    restart: unless-stopped
+    ports:
+      - 5434:5432 #{port in host(myPC)} : {port in Container}
+    #environment variables, like: db's usernname, password...
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Abc123456789
+      POSTGRES_DB: testdb
+    # Lưu dữ liệu ra volume để không mất khi xoá/tạo lại container
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    # Kiểm tra DB đã sẵn sàng nhận kết nối chưa (không chỉ là container đã chạy)
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d testdb']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - nestjs-network
+
+  # Database riêng cho test, dùng volume tạm để mỗi lần dựng lại là sạch
+  test-database:
+    image: postgres:15.0
+    container_name: test-database
+    restart: unless-stopped
+    ports:
+      - 5435:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Abc123456789
+      POSTGRES_DB: testdb
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d testdb']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - nestjs-network
+
+networks:
+  nestjs-network:
+
+volumes:
+  dev-db-data:
+#Create container,network,...from "docker composer" file:
+#-d: chạy nền (detached), không chiếm terminal
+#docker compose up -d

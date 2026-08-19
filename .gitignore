@@ -171,3 +171,5 @@ pnpm-debug.log*
 
 # temp directory
 .tmp
+
+/src/generated/prisma
