@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDTO } from './dto'; //import cả một "thư mục"
 
@@ -19,6 +19,8 @@ export class AuthController {
   }
 
   //POST: .../auth/login
+  //login không tạo tài nguyên mới nên trả 200 thay vì 201 mặc định
+  @HttpCode(HttpStatus.OK)
   @Post('login')
   login(@Body() authDTO: AuthDTO) {
     return this.authService.login(authDTO);
