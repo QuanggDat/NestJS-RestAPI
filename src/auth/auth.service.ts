@@ -1,4 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -6,7 +8,11 @@ import { AuthDTO } from './dto';
 
 @Injectable() //đây là "Dependency Injection" - tiêm phụ thuộc
 export class AuthService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
   async register(authDTO: AuthDTO) {
     //mã hoá mật khẩu thành hashedPassword
@@ -59,10 +65,25 @@ export class AuthService {
     if (!passwordMatched) {
       throw new ForbiddenException('Incorrect password');
     }
+    //đăng nhập thành công thì trả về access token
+    return await this.convertToJwtString(user.id, user.email);
+  }
+
+  //tạo chuỗi JWT từ id và email của user
+  async convertToJwtString(
+    userId: number,
+    email: string,
+  ): Promise<{ accessToken: string }> {
+    const payload = {
+      sub: userId, //"sub" là quy ước của JWT để chứa id người dùng
+      email,
+    };
+    const jwtString = await this.jwtService.signAsync(payload, {
+      expiresIn: '10m', //token hết hạn sau 10 phút
+      secret: this.configService.get<string>('JWT_SECRET'),
+    });
     return {
-      id: user.id,
-      email: user.email,
-      createdAt: user.createdAt,
+      accessToken: jwtString,
     };
   }
 }
