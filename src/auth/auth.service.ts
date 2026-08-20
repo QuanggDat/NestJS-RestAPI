@@ -66,11 +66,11 @@ export class AuthService {
       throw new ForbiddenException('Incorrect password');
     }
     //đăng nhập thành công thì trả về access token
-    return await this.convertToJwtString(user.id, user.email);
+    return await this.signJwtToken(user.id, user.email);
   }
 
-  //tạo chuỗi JWT từ id và email của user
-  async convertToJwtString(
+  //trả về một object, không phải string
+  async signJwtToken(
     userId: number,
     email: string,
   ): Promise<{ accessToken: string }> {
