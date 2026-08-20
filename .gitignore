@@ -173,3 +173,7 @@ pnpm-debug.log*
 .tmp
 
 /src/generated/prisma
+
+# Claude Code / AI agent config
+.claude/
+.agents/
