@@ -1,98 +1,172 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# NestJS RestAPI
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Back-end REST API viết bằng NestJS + Prisma + PostgreSQL, phục vụ cho front-end
+Next.js (`NextJS-Blogs-Management`).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+API gồm 2 phần: **xác thực người dùng** (bảng `users`) và **quản lý blog**
+(bảng `notes`).
 
-## Description
+## Kiến trúc
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Thành phần | Đường dẫn | Port |
+|---|---|---|
+| Back-end (NestJS)   | `NestJS-RestAPI`          | **3000** |
+| Front-end (Next.js) | `NextJS-Blogs-Management` | **3001** |
+| Database dev (Postgres) | docker `dev-database`  | 5434 |
+| Database test (Postgres) | docker `test-database` | 5435 |
 
-## Project setup
+Back-end đã bật CORS cho `http://localhost:3001` trong [`src/main.ts`](src/main.ts)
+để trình duyệt cho phép front-end gọi API.
 
+## Cách chạy
+
+**1. Bật database** (Docker phải đang chạy):
 ```bash
-$ npm install
+npm run db:dev:create      # tạo & bật container dev-database
+npm run prisma:dev:deploy  # chạy migration, tạo bảng users + notes
 ```
 
-## Compile and run the project
-
+**2. Cài thư viện và bật server**:
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+npm run start:dev          # watch mode, tự restart khi sửa code
 ```
 
-## Run tests
+Server chạy tại http://localhost:3000
 
+> Lần đầu clone project cần chạy thêm `npx prisma generate` để sinh Prisma Client
+> vào thư mục `src/generated/prisma`.
+
+**Lệnh hữu ích khác**:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run db:dev:restart     # xoá sạch DB dev, tạo lại từ đầu + chạy migration
+npm run start:prod         # chạy bản build production
+npm run test:e2e           # chạy e2e test (tự dựng lại test-database)
 ```
 
-## Deployment
+## Danh sách API
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Xác thực — không cần token
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+| Chức năng | Method | Endpoint | Body |
+|---|---|---|---|
+| Đăng ký | POST | `/auth/register` | `{ email, password }` |
+| Đăng nhập | POST | `/auth/login` | `{ email, password }` |
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+- `/auth/register` trả về `{ id, email, createdAt }`. Email trùng thì trả **403**
+  `Email already exists`.
+- `/auth/login` trả về `{ accessToken }`. Sai email/mật khẩu trả **403**.
+- `password` phải có **tối thiểu 6 ký tự** (`@MinLength(6)`), sai thì trả **400**.
+
+### Người dùng & Blog — bắt buộc gửi token
+
+Các route bên dưới đều có `@UseGuards(MyJwtGuard)`, phải gửi kèm header:
+
+```
+Authorization: Bearer <accessToken>
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+| Chức năng | Method | Endpoint | Ghi chú |
+|---|---|---|---|
+| Thông tin user đang đăng nhập | GET | `/users/me` | |
+| Danh sách blog | GET | `/notes` | chỉ trả blog của chính user đó |
+| Chi tiết blog | GET | `/notes/:id` | |
+| Tạo blog | POST | `/notes` | `userId` tự gắn từ token |
+| Sửa blog | PATCH | `/notes/:id` | dùng **PATCH**, không phải PUT |
+| Xoá blog | DELETE | `/notes/:id` | trả **204 No Content** |
 
-## Resources
+Thiếu hoặc sai token → **401 Unauthorized**.
+Sửa/xoá blog của người khác → **403 Access to resource denied**.
 
-Check out a few resources that may come in handy when working with NestJS:
+## Cấu trúc dữ liệu
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Xem chi tiết tại [`prisma/schema.prisma`](prisma/schema.prisma).
 
-## Support
+**Bảng `users`**
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+| Field | Kiểu | Ghi chú |
+|---|---|---|
+| id | Int | khoá chính, tự tăng |
+| email | String | **unique** |
+| hashedPassword | String | mã hoá bằng argon2, không bao giờ trả về client |
+| firstName, lastName | String? | có thể để trống |
+| createdAt, updatedAt | DateTime | |
 
-## Stay in touch
+**Bảng `notes`**
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+| Field | Kiểu | Ghi chú |
+|---|---|---|
+| id | Int | khoá chính, tự tăng |
+| title | String | bắt buộc |
+| description | String | bắt buộc |
+| url | String | bắt buộc, phải đúng định dạng URL (`@IsUrl`) |
+| userId | Int | khoá ngoại trỏ tới `users.id` |
+| createdAt, updatedAt | DateTime | |
 
-## License
+Quan hệ: một `user` viết được nhiều `note` (1–n).
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+> Khi tạo/sửa blog, `url` phải dạng `https://example.com`. Nhập chuỗi thường
+> sẽ bị `ValidationPipe` trả về lỗi **400**.
+
+## Cấu trúc thư mục
+
+```
+src/
+├── main.ts                     # điểm khởi động: bật CORS + ValidationPipe
+├── app.module.ts               # module gốc, gom tất cả module con
+├── auth/                       # đăng ký / đăng nhập
+│   ├── auth.controller.ts      # nhận request POST /auth/*
+│   ├── auth.service.ts         # mã hoá mật khẩu, kiểm tra login, ký JWT
+│   ├── dto/auth.dto.ts         # ràng buộc dữ liệu client gửi lên
+│   ├── strategy/jwt.strategy.ts# đọc & kiểm tra token, gắn user vào request
+│   ├── guard/myjwt.guard.ts    # chặn request không có token hợp lệ
+│   └── decorator/              # @GetUser() lấy user ra khỏi request
+├── user/
+│   └── user.controller.ts      # GET /users/me
+├── note/                       # CRUD blog
+│   ├── note.controller.ts      # định tuyến GET/POST/PATCH/DELETE /notes
+│   ├── note.service.ts         # xử lý nghiệp vụ + kiểm tra quyền sở hữu
+│   └── dto/                    # InsertNoteDTO, UpdateNoteDTO
+├── prisma/
+│   └── prisma.service.ts       # kết nối PostgreSQL
+└── generated/prisma/           # Prisma Client tự sinh (không sửa tay)
+
+prisma/
+├── schema.prisma               # định nghĩa bảng users, notes
+└── migrations/                 # lịch sử thay đổi cấu trúc DB
+```
+
+## Luồng xử lý một request
+
+```
+Client → Controller → Service → PrismaService → PostgreSQL
+             ↑
+          Guard + Strategy (kiểm tra token, với route cần đăng nhập)
+```
+
+- **Controller**: nhận request, không chứa logic nghiệp vụ.
+- **Service**: xử lý nghiệp vụ (mã hoá mật khẩu, kiểm tra quyền, truy vấn DB).
+- **DTO**: mô tả dữ liệu client được phép gửi lên. `ValidationPipe` với
+  `whitelist: true` sẽ **tự loại bỏ** field không khai báo trong DTO.
+- **Guard + Strategy**: đọc token từ header, giải mã, tìm user trong DB rồi gắn
+  vào `request.user`.
+
+## Biến môi trường
+
+File [`.env`](.env) (môi trường dev):
+
+```
+DATABASE_URL="postgresql://postgres:Abc123456789@localhost:5434/testdb?schema=public"
+JWT_SECRET="..."
+```
+
+File `.env.test` dùng cho e2e test, trỏ sang `test-database` ở port 5435 nên
+chạy test **không ảnh hưởng** dữ liệu dev.
+
+## Lưu ý quan trọng
+
+1. **Token chỉ sống 10 phút** (`expiresIn: '10m'` trong
+   [`auth.service.ts`](src/auth/auth.service.ts)). Hết hạn phải đăng nhập lại.
+2. **Sửa blog dùng PATCH**, không phải PUT — front-end phải gọi đúng method.
+3. **Đổi code trong `main.ts` phải khởi động lại server** thì CORS mới có hiệu lực.
+4. Mỗi user chỉ thấy và thao tác được blog của chính mình.
